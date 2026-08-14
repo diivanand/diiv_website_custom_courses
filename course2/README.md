@@ -27,8 +27,9 @@ labs/lab-<M>-<N>/   one folder per lab: README.md (link to the lab page),
                     analysis.ipynb), captures/ (Siglent CSVs, Saleae .sal,
                     DMM/LCR logs); M8–9 labs add edge/ (C++20 app, device
                     Python, exported models)
-firmware/           STM32 CMake projects (C18), one per module, shared by that
-                    module's labs — see firmware/README.md
+firmware/           STM32 CMake projects (C18) — one per module that has firmware
+                    (m2, m3, m5, m6, m7, m9), shared by that module's labs — see
+                    firmware/README.md
   shared/           MCU-independent DSP kernels (portable C, no HAL): compiled
                     into every module project AND by the host harness below
   host/             native build + CTest of shared/ — runs on the Mac today,
@@ -43,7 +44,7 @@ hardware/           breadboard photos, LTspice .asc schematics, datasheets
 
 ```bash
 uv sync                                  # from the repo root: Python for every lab's host/
-cd firmware/host                         # portable kernels — works right now
+cd course2/firmware/host                 # portable kernels — works right now
 cmake --preset debug && cmake --build --preset debug && ctest --preset debug
 ```
 

@@ -44,7 +44,7 @@ nothing beyond the Xcode command-line tools and `uv`.**
 |---|---|---|---|
 | Python (all courses) | repo root | `uv sync`, then `uv run jupyter lab` | ✅ |
 | Course 3 — any module | `course3/m0` … `m8` | `make check`, then `make run-<ex>` | ✅ |
-| Course 4 — C++ / Vulkan | `course4/` | `cmake --preset release && cmake --build --preset release` | ✅ (101 targets) |
+| Course 4 — C++ / Vulkan | `course4/` | `cmake --preset release && cmake --build --preset release` | ✅ (~100 build steps) |
 | Course 4 — Swift / Metal | `course4/metal-swift/` | `swift build` | ✅ |
 | Course 2 — portable DSP kernels | `course2/firmware/host/` | `cmake --preset debug && cmake --build --preset debug && ctest --preset debug` | ✅ |
 | Course 4 — CUDA | `course4/` | `cmake --preset linux-release` | needs the RTX 4090 box |
@@ -65,7 +65,7 @@ uv sync                                              # Python, all courses
 cd course3/m0 && make check && cd ../..              # assembly/C toolchain check
 
 cd course4 && cmake --preset release \
-           && cmake --build --preset release         # fetches deps, builds 101 targets
+           && cmake --build --preset release         # fetches deps, ~100 build steps
 cd metal-swift && swift build && cd ../..            # Swift/Metal lab apps
 
 cd course2/firmware/host \
@@ -95,12 +95,12 @@ diiv_website_custom_courses/
   pyproject.toml              # shared uv project (all courses' Python work)
   course2/                    # ── Embedded DSP labs ──────────────────────────
     docs/                     #   reading-map.md, edge-setup.md (Pi 5 / Jetson + C++20 CMake template)
-    firmware/                 #   STM32 CMake projects (C18), one per module + arm-none-eabi toolchain file
+    firmware/                 #   STM32 CMake projects (C18), one per module with firmware (m2,m3,m5–m7,m9)
     labs/lab-<M>-<N>/         #   one folder per lab: notes.md, host/, captures/, edge/ (M8–9)
     media/in|out/             #   Module 9 host-in-the-loop test media
     hardware/                 #   breadboard photos, LTspice .asc schematics, datasheets
   course3/                    # ── Computer architecture & ARM assembly ───────
-    m0/ … m8/                 #   one folder per module: Makefile, .s/.c sources, notes.md
+    m0/ … m8/                 #   one folder per module: Makefile, src/<exercise>/ (.c/.s), notes.md
   course4/                    # ── Rendering & GPU engineering ────────────────
     CMakeLists.txt            #   self-contained C++20 CMake project (presets: debug/release/profile/linux-*)
     engine/  shaders/  cuda/  #   the growing engine, GLSL/MSL shaders, CUDA C++ + python/
@@ -112,7 +112,7 @@ diiv_website_custom_courses/
 
 ## Course 2 toolchains
 
-- **STM32 firmware** — CMake projects targeting **C18** (`-std=gnu17`; arm-none-eabi-gcc has full C17/C18 support). One project per module (labs within a module share it), generated via STM32CubeMX's CMake toolchain option with HAL/LL drivers; CMSIS-DSP for the math, FreeRTOS for Module 7. See `course2/firmware/README.md`.
+- **STM32 firmware** — CMake projects targeting **C18** (`-std=gnu17`; arm-none-eabi-gcc has full C17/C18 support). One project per module that has firmware — m2, m3, m5, m6, m7, m9 — shared by that module’s labs, generated via STM32CubeMX's CMake toolchain option with HAL/LL drivers; CMSIS-DSP for the math, FreeRTOS for Module 7. See `course2/firmware/README.md`.
 - **Pi 5 / Jetson C++** — CMake projects targeting **C++20** (OpenCV, ALSA/PortAudio, and on the Jetson CUDA/cuFFT/TensorRT). See `course2/docs/edge-setup.md`.
 - **Workflow: simulate in Python first.** Every algorithm is prototyped and verified in Python (NumPy/SciPy, Jupyter) in the lab's `host/` folder **before** any C or C++ is written; the compiled implementation is then validated against the Python reference, measured on real hardware, and reconciled in the lab's `notes.md`.
 

@@ -39,7 +39,8 @@ cmake --preset debug -DARM_TOOLCHAIN_DIR=/opt/ST/STM32CubeCLT/GNU-tools-for-STM3
 Configuring without a toolchain fails immediately with these instructions rather than a wall of
 CMake compiler-detection errors.
 
-For flashing: **STM32CubeProgrammer** (`STM32_Programmer_CLI` on PATH) — used by `make flash-*`.
+For flashing: **STM32CubeProgrammer** (`STM32_Programmer_CLI` on PATH) — used by the
+`flash-<module>` build target (see *Build and flash* below).
 
 ## Start here: `host/` — the part that works right now
 
@@ -75,9 +76,10 @@ this repo carries.
    page (80 MHz system clock throughout).
 3. Project Manager → Toolchain/IDE = **CMake** → generate **into the module folder**
    (e.g. `firmware/m5-daq/`).
-4. CubeMX writes its own `CMakeLists.txt`. **Delete it** — this repo's `CMakeLists.txt` already
-   there is the one to keep. Everything CubeMX generates under `Core/` and `Drivers/` is picked up
-   automatically by glob.
+4. CubeMX writes its own `CMakeLists.txt` (and `CMakePresets.json`) **over** the ones already in
+   the module folder. Restore this repo's versions afterwards:
+   `git checkout -- CMakeLists.txt CMakePresets.json`. Everything CubeMX generates under `Core/`
+   and `Drivers/` is picked up automatically by glob.
 
 You do *not* need to hand-edit the generated files. In particular the usual "CubeMX emits
 `CMAKE_C_STANDARD 11`, bump it to 17" chore is already handled centrally in
@@ -112,17 +114,20 @@ m6-dsp/
   *.ld                  # CubeMX linker script
 ```
 
-`src/`, `include/`, and `../shared/` are globbed with `CONFIGURE_DEPENDS`, so adding a file and
-rebuilding is enough — CMake re-runs itself.
+`src/` and `../shared/src/` are globbed with `CONFIGURE_DEPENDS` (and `include/` is on the include
+path), so adding a file and rebuilding is enough — CMake re-runs itself.
 
 ## Libraries
 
 - **HAL/LL drivers** — generated per project by CubeMX.
 - **CMSIS-DSP** (`arm_math.h`) — from Module 6 on. `m6-dsp`, `m7-rtos`, and `m9-media` already pass
-  `CMSIS_DSP` to `stm32_add_firmware()`; it needs the sources present:
+  `CMSIS_DSP` to `stm32_add_firmware()`; **each of the three** needs its own copy of the sources
+  under its `Drivers/`:
 
   ```sh
-  git clone --depth 1 https://github.com/ARM-software/CMSIS-DSP m6-dsp/Drivers/CMSIS-DSP
+  for m in m6-dsp m7-rtos m9-media; do
+    git clone --depth 1 https://github.com/ARM-software/CMSIS-DSP $m/Drivers/CMSIS-DSP
+  done
   ```
 
   The build defines `ARM_MATH_CM4`, `__FPU_PRESENT=1U`, and `ARM_MATH_LOOPUNROLL`, and compiles with
@@ -134,8 +139,8 @@ rebuilding is enough — CMake re-runs itself.
 
 ## What `stm32_add_firmware()` does
 
-`cmake/stm32_firmware.cmake` holds the single helper each module calls, so the six `CMakeLists.txt`
-files stay three lines long. It sets C18/C++20, globs `Core/ Drivers/ src/ ../shared/src/`, adds the
+`cmake/stm32_firmware.cmake` holds the single helper each module calls, so each of the six
+`CMakeLists.txt` files is nothing but `project()` + one `stm32_add_firmware()` call. It sets C18/C++20, globs `Core/ Drivers/ src/ ../shared/src/`, adds the
 HAL and CMSIS include paths that exist, defines `USE_HAL_DRIVER` and `STM32L476xx`, finds the
 CubeMX linker script, adds `-Wall -Wextra -Wshadow`, and attaches the size report, hex/bin
 conversion, and `flash-<module>` target. Optional `CMSIS_DSP` wires in the DSP library.

@@ -9,7 +9,7 @@ only thing left to write is the code the labs are about.
 
 ```bash
 cmake --preset release          # fetches all pinned deps on first configure
-cmake --build --preset release  # builds engine + all lab stubs + shader target
+cmake --build --preset release  # builds engine + all lab stubs (+ shaders, once glslc is installed)
 ./build/release/labs/lab-0-1/lab_0_1   # prints "build OK"
 ```
 
@@ -23,7 +23,8 @@ needs a one-time download — see `docs/setup.md`.
 
 ```
 engine/          core/ vulkan/ metal/ — the C++20 engine, grown lab by lab
-labs/lab-M-N/    notes.md, captures/, benchmarks/, and (where C++) src/ + target
+labs/lab-M-N/    notes.md, captures/, benchmarks/ (results), and (where C++)
+                 src/ + target; lab-0-2 also has bench/ for benchmark sources
 shaders/         glsl/ (glslc → SPIR-V via the compile_shaders target), msl/
 metal-swift/     SwiftPM package: the Module 0/2/3 Metal apps (Lab04 … Lab34)
 cuda/            Module 1 CUDA C++ labs + python/ (Numba/CuPy, root uv env)

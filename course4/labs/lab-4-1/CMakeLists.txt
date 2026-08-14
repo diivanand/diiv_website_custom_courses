@@ -3,3 +3,9 @@ if(NOT TARGET engine_vulkan)
 endif()
 add_executable(lab_4_1 src/main.cpp)
 target_link_libraries(lab_4_1 PRIVATE course4_options engine_vulkan)
+
+# Module 4 is the metal-cpp port: link the Metal backend too when it is
+# enabled (-DCOURSE4_ENABLE_METAL=ON + third_party/metal-cpp present).
+if(TARGET engine_metal)
+  target_link_libraries(lab_4_1 PRIVATE engine_metal)
+endif()

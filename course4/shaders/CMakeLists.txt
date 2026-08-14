@@ -13,12 +13,15 @@ endif()
 
 set(spv_outputs "")
 foreach(src ${glsl_sources})
-  get_filename_component(name ${src} NAME)
-  set(out ${CMAKE_BINARY_DIR}/shaders/${name}.spv)
+  # Mirror glsl/'s subdirectory layout in the output so two shaders with the
+  # same basename in different subdirs can't collide on one .spv path.
+  file(RELATIVE_PATH rel ${CMAKE_CURRENT_SOURCE_DIR}/glsl ${src})
+  set(out ${CMAKE_BINARY_DIR}/shaders/${rel}.spv)
+  get_filename_component(out_dir ${out} DIRECTORY)
   add_custom_command(OUTPUT ${out}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/shaders
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${out_dir}
     COMMAND ${GLSLC} -O ${src} -o ${out}
-    DEPENDS ${src} COMMENT "glslc ${name}")
+    DEPENDS ${src} COMMENT "glslc ${rel}" VERBATIM)
   list(APPEND spv_outputs ${out})
 endforeach()
 

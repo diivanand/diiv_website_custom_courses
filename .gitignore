@@ -14,7 +14,8 @@ __pycache__/
 
 # CMake / C / C++ build output
 build/
-cmake-build-*/          # CLion default build dirs (cmake-build-debug, cmake-build-release, …)
+# CLion default build dirs (cmake-build-debug, cmake-build-release, …)
+cmake-build-*/
 CMakeUserPresets.json
 *.o
 *.obj
@@ -22,9 +23,10 @@ CMakeUserPresets.json
 *.map
 compile_commands.json
 
-# STM32CubeIDE leftovers (if a module is ever opened in the IDE)
-Debug/
-Release/
+# STM32CubeIDE leftovers (if a module is ever opened in the IDE) — scoped to the
+# firmware tree so lab dirs named debug/release are never swallowed silently
+course2/firmware/*/Debug/
+course2/firmware/*/Release/
 *.launch
 
 # LTspice temp output (keep .asc schematics)
@@ -32,10 +34,11 @@ Release/
 *.log.raw
 *.op.raw
 
-# JetBrains IDEs (CLion, PyCharm)
+# JetBrains IDEs (CLion, PyCharm) — out/ anchored to the repo root only, so
+# course2/media/out/ (Module 9 test media) stays tracked
 .idea/
 *.iml
-out/
+/out/
 
 # Other editors
 .vscode/

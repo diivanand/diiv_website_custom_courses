@@ -1,10 +1,10 @@
 # Course 3 — Computer Architecture, ARM Assembly & Modern Embedded C
 
-Coding workspace for [Course 3](https://www.diiv.io/course3/index.html). Everything here builds and
+Coding workspace for [Course 3](https://www.diiv.io/course3/). Everything here builds and
 runs **natively on an Apple Silicon Mac** — A64 assembly, C, and Cortex-M cross-disassembly. No
 board, no `arm-none-eabi` toolchain, nothing to install beyond the Xcode command-line tools.
 
-The lab and exercise statements live on the website. This repo holds only what working them
+The lesson and exercise statements live on the website. This repo holds only what working them
 produces: your sources and your `notes.md`.
 
 ## Requirements
@@ -23,9 +23,9 @@ cd m3 && make check
 
 ```
 module m3 toolchain check
-  clang                 Apple clang version 21.0.0
+  clang                 Apple clang version 21.0.0 (clang-2100.1.1.101)
   llvm-objdump          /Applications/Xcode.app/.../llvm-objdump
-  host target           arm64-apple-darwin25.5.0
+  host target           arm64-apple-darwin25.6.0
   thumb target          thumbv7em-none-eabihf OK
   OK
 ```
@@ -52,7 +52,7 @@ Makefile to write and no file list to maintain.
 
 ```
 m4/
-  Makefile            # 3 lines: sets MODULE, includes ../common.mk
+  Makefile            # sets MODULE (m7/m8 also default SAN=1), includes ../common.mk
   notes.md            # your predicted-vs-observed write-up
   src/
     ex-4-1/
@@ -94,7 +94,7 @@ make dis-ex-4-2           # disassemble the linked binary (A64)
 
 | Knob | Default | Why you'd change it |
 |---|---|---|
-| `OPT=0\|1\|2\|3\|s` | `0` | Several exercises only show what they're meant to at `-O0` — at `-O2` the compiler folds the very construction under study. Others exist to be read at `-O2`. Switch freely: `make OPT=2 dis-ex-1-3`. |
+| `OPT=0\|1\|2\|3\|s` | `0` | Several exercises only show what they're meant to at `-O0` — at `-O2` the compiler folds the very construction under study. Others exist to be read at `-O2`. Switch freely: `make OPT=2 dis-ex-1-3` — changing `OPT=` or `SAN=` rebuilds the module from scratch, so what you disassemble is always what you asked for. |
 | `SAN=1` | off (on for m7/m8) | AddressSanitizer + UndefinedBehaviorSanitizer, with `-fno-sanitize-recover` so the first violation aborts. Modules 7–8 default it on; turn it off with `make SAN=0`. |
 | `VERBOSE=1` | off | Echo full compiler command lines instead of `CC file.c`. |
 
@@ -112,6 +112,7 @@ separate file. `make thumb-<ex>` compiles what it can, skips the rest, and tells
 
 ## What is deliberately not here
 
-No exercise solutions, no starter implementations, and no filled-in `notes.md` tables. `src/` starts
-empty in every module and the "Observed" columns start as `…`. That is the coursework — the build
-system exists so that none of your time goes into makefiles.
+No exercise solutions and no starter implementations. `src/` starts empty in every module, and each
+`notes.md` starts as a skeleton whose "Observed" entries are filled in only by working the exercises
+by hand (m0's is already worked). That is the coursework — the build system exists so that none of
+your time goes into makefiles.

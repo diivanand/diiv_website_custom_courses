@@ -1,7 +1,7 @@
 [project]
-name = "course2-labs"
+name = "diiv-course-labs"
 version = "0.1.0"
-description = "Python for the Course 2 embedded DSP labs: simulate-first prototypes, serial capture, analysis, and plotting (per-lab work in labs/lab-M-N/host/)"
+description = "Shared Python for all diiv.io course workspaces: simulate-first prototypes, serial capture, analysis, and plotting (per-lab work in course2/labs/lab-M-N/host/)"
 requires-python = ">=3.13"
 dependencies = [
     # numerics + DSP reference implementations

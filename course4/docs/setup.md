@@ -9,7 +9,8 @@ One-time environment steps per platform. Everything else is fetched by CMake.
 - **Vulkan runtime:** install the **LunarG Vulkan SDK** for macOS (MoltenVK ICD,
   validation layers, `glslc`, `vulkaninfo`). Source its `setup-env.sh` from the
   shell profile so `VULKAN_SDK` is set and `glslc` is on the PATH — the
-  `compile_shaders` target activates automatically once it is.
+  `compile_shaders` target appears automatically the next time you re-run the
+  configure step (`cmake --preset …`) with `glslc` on the PATH.
   Sanity check: `vulkaninfo --summary` shows a MoltenVK-backed device.
 - **metal-cpp (Module 4+):** download the metal-cpp zip from Apple's developer
   site (developer.apple.com/metal/cpp), unzip into `third_party/metal-cpp/`

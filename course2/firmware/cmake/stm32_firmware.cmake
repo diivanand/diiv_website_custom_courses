@@ -29,8 +29,15 @@ function(stm32_add_firmware TARGET)
 
   # --- sources ------------------------------------------------------------
   # Core/ and Drivers/ are CubeMX's output; src/ and include/ are yours.
+  # A CMSIS-DSP clone lives under Drivers/ too — keep it out of this sweep
+  # (it is added separately, and only when CMSIS_DSP is requested).
   file(GLOB_RECURSE _cube_c   CONFIGURE_DEPENDS "Core/*.c" "Drivers/*.c")
-  file(GLOB_RECURSE _cube_asm CONFIGURE_DEPENDS "Core/*.s" "*.s")
+  list(FILTER _cube_c EXCLUDE REGEX "/CMSIS-DSP/")
+  # Startup .s sits in Core/ or at the project root; a bare recursive "*.s"
+  # would also sweep build/ and Drivers/, so root stays non-recursive.
+  file(GLOB_RECURSE _cube_asm CONFIGURE_DEPENDS "Core/*.s")
+  file(GLOB _root_asm CONFIGURE_DEPENDS "*.s")
+  list(APPEND _cube_asm ${_root_asm})
   file(GLOB_RECURSE _own_c    CONFIGURE_DEPENDS "src/*.c")
 
   # ../shared/ holds MCU-independent kernels (no HAL, no CMSIS): the same .c
@@ -87,8 +94,20 @@ function(stm32_add_firmware TARGET)
         "  git clone --depth 1 https://github.com/ARM-software/CMSIS-DSP \\\n"
         "      ${_dsp}\n")
     endif()
-    target_include_directories(${TARGET} PRIVATE "${_dsp}/Include")
-    file(GLOB_RECURSE _dsp_src CONFIGURE_DEPENDS "${_dsp}/Source/*.c")
+    target_include_directories(${TARGET} PRIVATE "${_dsp}/Include" "${_dsp}/PrivateInclude")
+    # CMSIS-DSP ships each function group twice: per-function files
+    # (arm_fir_f32.c, …) AND a unity file per group (FilteringFunctions.c)
+    # that #includes all of them.  Compiling both duplicates every symbol,
+    # so compile only the unity files — the layout CMSIS-DSP's own build uses.
+    set(_dsp_src "")
+    file(GLOB _dsp_groups RELATIVE "${_dsp}/Source" "${_dsp}/Source/*")
+    foreach(_g IN LISTS _dsp_groups)
+      foreach(_f IN ITEMS "${_dsp}/Source/${_g}/${_g}.c" "${_dsp}/Source/${_g}/${_g}F16.c")
+        if(EXISTS "${_f}")
+          list(APPEND _dsp_src "${_f}")
+        endif()
+      endforeach()
+    endforeach()
     target_sources(${TARGET} PRIVATE ${_dsp_src})
     # ARM_MATH_CM4 selects the Cortex-M4 code paths; __FPU_PRESENT enables the
     # single-precision hardware routines the DSP labs are timed against.
@@ -99,8 +118,15 @@ function(stm32_add_firmware TARGET)
   if(ARG_LINKER_SCRIPT)
     set(_ld "${ARG_LINKER_SCRIPT}")
   else()
-    file(GLOB _ld_found "${CMAKE_CURRENT_SOURCE_DIR}/*FLASH.ld" "${CMAKE_CURRENT_SOURCE_DIR}/*.ld")
-    list(GET _ld_found 0 _ld)
+    # Prefer the FLASH script over the RAM one CubeMX also emits.
+    file(GLOB _ld_found "${CMAKE_CURRENT_SOURCE_DIR}/*FLASH.ld")
+    if(NOT _ld_found)
+      file(GLOB _ld_found "${CMAKE_CURRENT_SOURCE_DIR}/*.ld")
+    endif()
+    set(_ld "")
+    if(_ld_found)
+      list(GET _ld_found 0 _ld)
+    endif()
   endif()
   if(NOT _ld OR NOT EXISTS "${_ld}")
     message(FATAL_ERROR
@@ -123,6 +149,6 @@ function(stm32_add_firmware TARGET)
   # --- flash convenience --------------------------------------------------
   add_custom_target(flash-${TARGET}
     COMMAND STM32_Programmer_CLI -c port=SWD -w $<TARGET_FILE:${TARGET}> -rst
-    DEPENDS ${TARGET}
     COMMENT "Flashing ${TARGET} over ST-LINK (needs STM32CubeProgrammer on PATH)")
+  add_dependencies(flash-${TARGET} ${TARGET})
 endfunction()

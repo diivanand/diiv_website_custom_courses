@@ -60,8 +60,24 @@ SRC   := src
 BUILD := build
 OBJ   := $(BUILD)/obj
 
-EXERCISES := $(sort $(notdir $(patsubst %/,%,$(wildcard $(SRC)/*/))))
+# filter %/ keeps directories only: on make 3.81 the trailing-slash glob also
+# returns plain files (without the slash), which must not become "exercises".
+EXERCISES := $(sort $(notdir $(patsubst %/,%,$(filter %/,$(wildcard $(SRC)/*/)))))
 BINARIES  := $(addprefix $(BUILD)/,$(EXERCISES))
+
+# Flag guard, evaluated at parse time: build/ carries a stamp of the knobs it
+# was built with.  Invoking any *building* goal with different OPT=/SAN= wipes
+# build/ first, so `make OPT=2 dis-<ex>` can never silently disassemble stale
+# -O0 objects.  (Parse-time, not a rule: this make compares mtimes at 1-second
+# granularity, so a stamp file alone can tie with the objects and be missed.)
+_GOALS := $(if $(MAKECMDGOALS),$(MAKECMDGOALS),all)
+ifneq ($(filter-out clean help list check new,$(_GOALS)),)
+FLAGS_DESC := OPT=$(OPT) SAN=$(SAN)
+FLAGS_PREV := $(shell cat $(OBJ)/.flags 2>/dev/null)
+ifneq ($(FLAGS_DESC),$(FLAGS_PREV))
+_FLAGWIPE := $(shell rm -rf $(BUILD) && mkdir -p $(OBJ) && echo "$(FLAGS_DESC)" > $(OBJ)/.flags)
+endif
+endif
 
 .PHONY: all list check new clean help
 .DEFAULT_GOAL := all
@@ -77,15 +93,28 @@ define EXERCISE_RULES
 
 $(1)_CSRC := $$(wildcard $(SRC)/$(1)/*.c)
 $(1)_SSRC := $$(wildcard $(SRC)/$(1)/*.s)
+# .s objects get a .s.o suffix so a driver.c + driver.s pair can coexist —
+# mapping both to driver.o would silently drop the assembly file.
 $(1)_OBJS := $$(patsubst $(SRC)/$(1)/%.c,$(OBJ)/$(1)/%.o,$$($(1)_CSRC)) \
-             $$(patsubst $(SRC)/$(1)/%.s,$(OBJ)/$(1)/%.o,$$($(1)_SSRC))
+             $$(patsubst $(SRC)/$(1)/%.s,$(OBJ)/$(1)/%.s.o,$$($(1)_SSRC))
+
+.PHONY: run-$(1) dis-$(1) ll-$(1) thumb-$(1)
+
+# A scaffolded-but-empty exercise dir (fresh `make new`) must not break `make`:
+# give every target a friendly no-op instead of a bare link with no inputs.
+ifeq ($$($(1)_CSRC)$$($(1)_SSRC),)
+
+$(BUILD)/$(1) run-$(1) dis-$(1) ll-$(1) thumb-$(1):
+	@echo "[$(MODULE)] $(1): $(SRC)/$(1)/ has no .c or .s files yet — add one, then re-run make"
+
+else
 
 $(OBJ)/$(1)/%.o: $(SRC)/$(1)/%.c
 	$$(Q)mkdir -p $$(dir $$@)
 	$$(Q)echo "  CC    $$<"
 	$$(Q)$$(CC) $$(CFLAGS) -MMD -MP -c $$< -o $$@
 
-$(OBJ)/$(1)/%.o: $(SRC)/$(1)/%.s
+$(OBJ)/$(1)/%.s.o: $(SRC)/$(1)/%.s
 	$$(Q)mkdir -p $$(dir $$@)
 	$$(Q)echo "  AS    $$<"
 	$$(Q)$$(CC) $$(ASFLAGS) -c $$< -o $$@
@@ -94,8 +123,6 @@ $(BUILD)/$(1): $$($(1)_OBJS)
 	$$(Q)mkdir -p $$(dir $$@)
 	$$(Q)echo "  LD    $$@"
 	$$(Q)$$(CC) $$($(1)_OBJS) $$(LDFLAGS) -o $$@
-
-.PHONY: run-$(1) dis-$(1) ll-$(1) thumb-$(1)
 
 run-$(1): $(BUILD)/$(1)
 	@echo "--- running $(1) (OPT=$$(OPT)$(if $(filter 1,$(SAN)), SAN=on,)) ---"
@@ -138,6 +165,8 @@ thumb-$(1): $$($(1)_CSRC)
 	    echo "  includes only <stdint.h>/<stddef.h>, and keep the driver separate."; \
 	  fi
 
+endif
+
 endef
 
 $(foreach E,$(EXERCISES),$(eval $(call EXERCISE_RULES,$(E))))
@@ -154,11 +183,12 @@ list:
 check:
 	@echo "module $(MODULE) toolchain check"
 	@printf '  %-22s' "clang";       command -v $(CC) >/dev/null && $(CC) --version | head -1 || { echo "MISSING"; exit 1; }
-	@printf '  %-22s' "llvm-objdump"; command -v $(OBJDUMP) >/dev/null && echo "$(OBJDUMP)" || echo "MISSING (install Xcode CLT)"
+	@printf '  %-22s' "llvm-objdump"; command -v $(OBJDUMP) >/dev/null && echo "$(OBJDUMP)" || { echo "MISSING (install Xcode CLT) — dis-<ex>/thumb-<ex> will not work"; exit 1; }
 	@printf '  %-22s' "host target";  $(CC) -dumpmachine
 	@printf '  %-22s' "thumb target"; \
 	  if echo 'int f(int x){return x+1;}' | $(CC) $(THUMB_FLAGS) -x c - -o /dev/null 2>/dev/null; \
-	  then echo "$(THUMB_TARGET) OK"; else echo "$(THUMB_TARGET) UNAVAILABLE"; fi
+	  then echo "$(THUMB_TARGET) OK"; \
+	  else echo "$(THUMB_TARGET) UNAVAILABLE — thumb-<ex> will not work"; exit 1; fi
 	@echo "  OK"
 
 new:
@@ -184,6 +214,7 @@ help:
 	@echo "  make clean           remove $(BUILD)/"
 	@echo
 	@echo "  knobs:  OPT=0|1|2|3|s (default 0)   SAN=1 (ASan+UBSan)   VERBOSE=1"
+	@echo "          current: OPT=$(OPT)  SAN=$(if $(filter 1,$(SAN)),on,off)"
 	@echo
 	@echo "  Layout: one directory per exercise under $(SRC)/; every .c/.s inside"
 	@echo "          links into a single binary named after the directory."
