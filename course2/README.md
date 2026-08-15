@@ -25,8 +25,9 @@ captures, benchmarks, models.
 labs/lab-<M>-<N>/   one folder per lab: README.md (link to the lab page),
                     notes.md (bench write-up), host/ (simulate-first Python +
                     analysis.ipynb), captures/ (Siglent CSVs, Saleae .sal,
-                    DMM/LCR logs); M8–9 labs add edge/ (C++20 app, device
-                    Python, exported models)
+                    DMM/LCR logs); edge/ (C++20 app, device Python, exported
+                    models) on M8–9 and on every lab with a "Jetson Orin Nano —
+                    detailed procedure" section on the site (M2/M3/M6/M7)
 firmware/           STM32 CMake projects (C18) — one per module that has firmware
                     (m2, m3, m5, m6, m7, m9), shared by that module's labs — see
                     firmware/README.md
@@ -35,7 +36,8 @@ firmware/           STM32 CMake projects (C18) — one per module that has firmw
   host/             native build + CTest of shared/ — runs on the Mac today,
                     with no ARM toolchain and no board
 docs/               reading-map.md (bookshelf → modules), edge-setup.md
-                    (Pi 5 / Jetson + C++20 CMake template)
+                    (Pi 5 / Jetson bench I/O + timing knobs + C++20 CMake
+                    template — all modules, not just 8–9)
 media/in|out/       shared Module 9 test media
 hardware/           breadboard photos, LTspice .asc schematics, datasheets
 ```

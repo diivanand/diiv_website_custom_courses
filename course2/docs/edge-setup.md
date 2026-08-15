@@ -1,6 +1,31 @@
-# Edge targets — Pi 5 + Jetson Orin Nano setup (Modules 8–9)
+# Edge targets — Pi 5 + Jetson Orin Nano setup
 
-Device-side work for the edge labs lives in each lab's own folder: `labs/lab-8-1/edge/` … `labs/lab-9-6/edge/`. Everything is prototyped in Python first (`labs/lab-<M>-<N>/host/`, or on-device for GPU-only paths), then ported to **C++20 CMake** where the lab calls for a compiled implementation.
+Device-side work lives in each lab's own folder as `labs/lab-<M>-<N>/edge/`. Originally that meant Modules 8–9 only; since the 2026-08-14 Jetson-procedure pass on the site, **any lab with a "Jetson Orin Nano — detailed procedure" section uses an `edge/` folder too** (Modules 2, 3, 6, 7, and 9.1's transport). Everything is prototyped in Python first (`labs/lab-<M>-<N>/host/`, or on-device for GPU-only paths), then ported to **C++20 CMake** where the lab calls for a compiled implementation. The one-time board configuration (packages, groups, header map, timing knobs) is on the course site under *Jetson Orin Nano setup essentials*; this file keeps the repo-side quick reference.
+
+## Bench I/O quick reference (40-pin header)
+
+Both boards are assumed flashed, on the LAN, and reachable over SSH. One-time bench packages/permissions:
+
+```sh
+sudo apt install i2c-tools libgpiod-dev gpiod python3-libgpiod rt-tests \
+                 build-essential cmake ninja-build
+sudo usermod -aG i2c,gpio $USER          # then log out/in once
+pip install smbus2 Jetson.GPIO           # (Jetson; Pi: gpiozero/RPi.GPIO-compatible libs)
+```
+
+| Thing | Jetson Orin Nano | Pi 5 | Course convention |
+|---|---|---|---|
+| I²C on pins 3/5 | `/dev/i2c-7` (`i2cdetect -y -r 7`) | `/dev/i2c-1` | verify with `i2cdetect -l`, never assume |
+| GPIO | `libgpiod` (find lines via `gpioinfo`); `Jetson.GPIO` BOARD mode | `libgpiod`; `rppal` for the fast mmap path | marker pin = **physical pin 7**, second marker **29**, third **31** |
+| UART on pins 8/10 | `/dev/ttyTHS*` (typically `ttyTHS1`) | `/dev/ttyAMA0` (enable in `raspi-config`) | 3.3 V domain, tap-don't-drive |
+| Timing runs | `sudo nvpmodel -m 0 && sudo jetson_clocks`; `tegrastats` | `performance` governor | `taskset -c 3 chrt -f 80 <bin>`, `cyclictest -t1 -p 90 -i 100` baseline, record `uname -v` |
+
+## Remote dev loop
+
+Two equally good loops — pick per task:
+
+- **CLion remote toolchain over SSH** (Settings → Build, Execution, Deployment → Toolchains → + Remote Host, point at the board): edit on the Mac, build/run/debug on the device. Same workflow as Course 4's remote RTX box.
+- **Terminal**: `rsync`/`git pull` the lab folder, `cmake -B build && cmake --build build -j`, run under `chrt` as above.
 
 ## C++20 CMake template
 

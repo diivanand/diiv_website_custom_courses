@@ -102,6 +102,28 @@ Every build prints a `size` report and the linker's memory-usage summary, and em
 | `debug` | `-Og -g3` — the default; steps cleanly in a debugger |
 | `release` | `-O2 -g` — what you benchmark against with the DWT cycle counter |
 
+(Labs that ask for a literal `-O0` comparison: add a one-off profile/configure passing
+`-DCMAKE_C_FLAGS_DEBUG="-O0 -g3"`.)
+
+### Working in CLion
+
+These are plain CMake projects, so CLion opens them directly — no plugin-specific project format:
+
+1. **Open** the module folder (e.g. `m5-daq/`). CLion reads `CMakeLists.txt` + `CMakePresets.json`;
+   enable the **debug** and **release** profiles when prompted.
+2. **Build/flash** with the normal build action or the `flash-<module>` target (same commands as
+   above; add `-DARM_TOOLCHAIN_DIR=…` in the profile's CMake options if you use the CubeCLT
+   toolchain copy).
+3. **Debug** over the on-board ST-LINK with OpenOCD (`brew install openocd`): *Run → Edit
+   Configurations → + → OpenOCD Download & Run*, board config **`board/st_nucleo_l4.cfg`**, target =
+   the module executable. Breakpoints, stepping, and register views work as expected.
+4. **Board stuck in a watchdog reset loop** (Lab 7.1): connect under reset —
+   `STM32_Programmer_CLI -c port=SWD mode=UR` — then reflash.
+
+CubeMX remains the owner of the `.ioc` (regenerate after peripheral changes; your `src/`/`include/`
+are untouched). STM32CubeIDE still works if preferred — generate with Toolchain/IDE = STM32CubeIDE
+instead — but the repo's presets, `shared/`+`host/` harness, and flash targets assume CMake.
+
 ### Where your code goes
 
 ```
