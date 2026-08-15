@@ -1,6 +1,6 @@
 # Course 2 — Embedded DSP: lab workspace
 
-Bench workspace for [Course 2 on diiv.io](https://www.diiv.io/course2/) — 45 labs
+Bench workspace for [Course 2 on diiv.io](https://www.diiv.io/course2/) — 46 labs
 from instruments and analog front-ends through STM32 real-time DSP firmware to
 edge ML and host-in-the-loop media. **Lab instructions live on the website, not
 here** — each lab folder holds only what working it produces: notes, code,
@@ -16,7 +16,7 @@ captures, benchmarks, models.
 - m5 — Real-time acquisition (labs 5.1–5.4): STM32 ADC single → timer-triggered → DMA
 - m6 — DSP kernels on the M4 (labs 6.1–6.9): FIR, IIR, FFT/PSD, Goertzel, Kalman, matched filter, LMS, CFAR
 - m7 — Robustness & RTOS (labs 7.1–7.3): watchdog/HardFault, FreeRTOS pipeline, capstone
-- m8 — Edge ML (labs 8.1–8.5): Pi 5 / Jetson Orin Nano, GPU DSP, ONNX/TensorRT
+- m8 — Edge ML (labs 8.1–8.6): Pi 5 / Jetson Orin Nano, GPU DSP, ONNX/TensorRT, live camera object detection
 - m9 — Host-in-the-loop media (labs 9.1–9.6): streaming DSP over the 921600-baud harness
 
 ## Layout

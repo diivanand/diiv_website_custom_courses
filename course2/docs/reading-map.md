@@ -15,6 +15,8 @@ The course pages already carry per-lab **Recommended reading** from the DSP/theo
 | Plantz, *Introduction to Computer Organization* (ARM A64) | AArch64 fundamentals for the Pi 5 / Jetson (both are A64 cores) |
 | Smith, *Programming with 64-Bit ARM Assembly Language* | Hands-on A64 + NEON SIMD on the Raspberry Pi — reading and beating compiler output |
 | Scherz & Monk, *Practical Electronics for Inventors* (4th ed) | The analog/bench companion (PEI) — Modules 0–1 and 4; already cited inline on those lab pages |
+| Such, *Embedded AI: Intelligence at the Deep Edge* (No Starch, Early Access) | Project-based Module 8 companion: person-detection CNN on an MCU (Ch 4), RNN noise suppression (Ch 10), hot-word detection (Ch 12), IMU/sensor ML (Ch 7–9) |
+| Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed; free PDF at szeliski.org — 1st-ed PDF in hand covers only classical detectors) | Recognition/object-detection theory for Lab 8.6 (Ch 6) |
 
 ## By module
 
@@ -44,9 +46,11 @@ The course pages already carry per-lab **Recommended reading** from the DSP/theo
 - White: watchdog strategy and system-integrity design for 7.1.
 - Also backs the *Same STM32: bare-metal vs RTOS* sections in labs 2.2, 5.2, 5.3, and 6.x.
 
-**Modules 8–9 — edge targets (labs 8.1–8.5, 9.1–9.6)**
+**Modules 8–9 — edge targets (labs 8.1–8.6, 9.1–9.6)**
 - Plantz then Smith: A64 assembly literacy for the Pi 5/Jetson — enough to read `objdump`/`perf` output of your C++20 builds; Smith's NEON chapters map directly to vectorizing the 9.4 image convolution.
 - Harris & Harris: memory-hierarchy/cache chapter — why tiling and row-major access dominate 9.4/9.5 throughput.
 - White: her performance/"doing more with less" material when reconciling the 8.5 benchmark results.
+- Such: the per-chapter project pairings above (8.2 ← Ch 12, 8.3 ← Ch 10, 8.4 ← Ch 7–9, 8.6 ← Ch 4 as the constrained-target contrast).
+- Szeliski (2nd ed) Ch 6: the detection theory — single- vs two-stage detectors, NMS, IoU/mAP — behind the Lab 8.6 TensorRT deployment.
 
 **Everywhere:** Seacord for the C, Grenning for the workflow, White for the architecture instincts.
