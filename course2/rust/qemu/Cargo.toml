@@ -1,0 +1,23 @@
+[package]
+name = "qemu"
+edition.workspace = true
+version.workspace = true
+publish.workspace = true
+description = "Course 2 bare-metal tier in simulation — no_std on QEMU's lm3s6965evb (Cortex-M3), semihosting output"
+
+[dependencies]
+cortex-m = { workspace = true }
+cortex-m-rt = { workspace = true }
+cortex-m-semihosting = "0.5"
+panic-halt = "1"
+heapless = { workspace = true }
+critical-section = { workspace = true }
+
+[lints.rust]
+unsafe_op_in_unsafe_fn = "deny"
+missing_docs = "warn"
+
+[lints.clippy]
+all = "warn"
+unwrap_used = "deny"
+expect_used = "deny"

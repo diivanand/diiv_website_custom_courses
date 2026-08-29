@@ -1,0 +1,20 @@
+# Per-target runners and link args for the whole workspace.  There is
+# deliberately NO [build] target here: `cargo build` at the workspace root is
+# the host build.  The qemu/ and mcu/ crates carry their own .cargo/config.toml
+# with [build] target, so `cargo run` from inside those directories picks the
+# right target (cargo reads config from the current directory upward).
+
+[target.thumbv7m-none-eabi]
+# QEMU's Cortex-M3 board with semihosting: `cargo run` boots the binary, the
+# program prints through the host, and debug::exit() terminates QEMU.
+runner = "qemu-system-arm -cpu cortex-m3 -machine lm3s6965evb -nographic -semihosting-config enable=on,target=native -kernel"
+rustflags = ["-C", "link-arg=-Tlink.x"]
+
+[target.thumbv7em-none-eabihf]
+# The NUCLEO-L476RG through its on-board ST-LINK.  Needs probe-rs installed
+# (brew tap probe-rs/probe-rs && brew install probe-rs); defmt logs arrive over RTT.
+runner = "probe-rs run --chip STM32L476RGTx"
+rustflags = ["-C", "link-arg=-Tlink.x", "-C", "link-arg=-Tdefmt.x"]
+
+# aarch64-unknown-linux-gnu: `cargo check` only on the Mac (no cross linker);
+# `cargo build --release` natively on the Jetson / Pi.

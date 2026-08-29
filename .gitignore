@@ -25,8 +25,8 @@ compile_commands.json
 
 # STM32CubeIDE leftovers (if a module is ever opened in the IDE) — scoped to the
 # firmware tree so lab dirs named debug/release are never swallowed silently
-course2/firmware/*/Debug/
-course2/firmware/*/Release/
+course3/firmware/*/Debug/
+course3/firmware/*/Release/
 *.launch
 
 # LTspice temp output (keep .asc schematics)
@@ -35,7 +35,7 @@ course2/firmware/*/Release/
 *.op.raw
 
 # JetBrains IDEs (CLion, PyCharm) — out/ anchored to the repo root only, so
-# course2/media/out/ (Module 9 test media) stays tracked
+# course3/media/out/ (Module 9 test media) stays tracked
 .idea/
 *.iml
 /out/

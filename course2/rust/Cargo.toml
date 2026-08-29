@@ -1,0 +1,40 @@
+# Course 2 Rust workspace — four crates, one per runtime tier.
+#   host/   std        · Mac · unit tests, Miri, Clippy
+#   qemu/   no_std     · thumbv7m-none-eabi   · lm3s6965evb in QEMU (semihosting)
+#   mcu/    no_std     · thumbv7em-none-eabihf · STM32L476RG via embassy-stm32 (probe-rs)
+#   linux/  std        · aarch64-unknown-linux-gnu · Jetson Orin Nano / Pi 5
+# Exercises are per-tier binaries: <crate>/src/bin/ex-M-N.rs
+[workspace]
+resolver = "2"
+members = ["host", "qemu", "mcu", "linux"]
+# A bare `cargo build`/`cargo test` at the root builds only the host-target
+# crates; the no_std crates are built with `-p qemu --target thumbv7m-none-eabi`
+# / `-p mcu --target thumbv7em-none-eabihf`, or from inside their own directory.
+default-members = ["host", "linux"]
+
+[workspace.package]
+edition = "2024"
+version = "0.1.0"
+publish = false
+
+[workspace.dependencies]
+# pinned once here; crates reference them with `{ workspace = true }`
+heapless = "0.9"
+critical-section = "1.2"
+embedded-hal = "1.0"
+cortex-m = { version = "0.7", features = ["critical-section-single-core"] }
+cortex-m-rt = "0.7"
+
+# Release profile as the embedded crates want it: symbols kept for probe-rs /
+# objdump, size-optimized, whole-program LTO.  Host code is unaffected in what
+# matters (tests run under `dev`).
+[profile.release]
+debug = 2
+lto = true
+codegen-units = 1
+opt-level = "s"
+
+# `dev` at -O1 so QEMU/board debug builds are not absurdly slow or large.
+[profile.dev]
+opt-level = 1
+debug = 2

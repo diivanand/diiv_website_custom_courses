@@ -1,0 +1,29 @@
+[package]
+name = "linux"
+edition.workspace = true
+version.workspace = true
+publish.workspace = true
+description = "Course 2 embedded-Linux tier — std Rust on the Jetson Orin Nano / Raspberry Pi 5 (aarch64)"
+
+[dependencies]
+libc = "0.2"
+embedded-hal = { workspace = true }
+heapless = { workspace = true }
+
+# Linux-only crates: gated so `cargo build`/`cargo test` on the Mac stay green
+# for the POSIX-common subset; the board build gets everything.
+[target.'cfg(target_os = "linux")'.dependencies]
+nix = { version = "0.31", features = ["time", "sched", "signal", "event", "poll", "mman", "fs"] }
+gpiod = "0.3"
+linux-embedded-hal = "0.5"
+
+# On macOS only the POSIX-common part of nix is needed for local iteration.
+[target.'cfg(target_os = "macos")'.dependencies]
+nix = { version = "0.31", features = ["time", "signal", "poll", "mman", "fs"] }
+
+[lints.rust]
+unsafe_op_in_unsafe_fn = "deny"
+missing_docs = "warn"
+
+[lints.clippy]
+all = "warn"

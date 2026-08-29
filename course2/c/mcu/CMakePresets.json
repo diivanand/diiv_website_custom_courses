@@ -1,0 +1,26 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "m4",
+      "displayName": "Cortex-M4F objects + disassembly (Apple clang, -O2)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/m4",
+      "toolchainFile": "${sourceDir}/../cmake/thumbv7em-clang.cmake",
+      "cacheVariables": { "COURSE2_OPT": "2" }
+    },
+    {
+      "name": "m4-O0",
+      "displayName": "Cortex-M4F objects + disassembly, -O0 (for the constructs -O2 folds away)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/m4-O0",
+      "toolchainFile": "${sourceDir}/../cmake/thumbv7em-clang.cmake",
+      "cacheVariables": { "COURSE2_OPT": "0" }
+    }
+  ],
+  "buildPresets": [
+    { "name": "m4", "configurePreset": "m4" },
+    { "name": "m4-O0", "configurePreset": "m4-O0" },
+    { "name": "dis", "configurePreset": "m4", "targets": ["dis"] }
+  ]
+}

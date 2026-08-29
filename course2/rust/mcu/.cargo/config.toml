@@ -1,0 +1,7 @@
+# `cargo build`/`cargo run` from inside mcu/ target the NUCLEO-L476RG.  From the
+# workspace root use `cargo build -p mcu --target thumbv7em-none-eabihf`.
+[build]
+target = "thumbv7em-none-eabihf"
+
+[env]
+DEFMT_LOG = "info"
