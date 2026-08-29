@@ -15,7 +15,7 @@ The course pages already carry per-lab **Recommended reading** from the DSP/theo
 | Plantz, *Introduction to Computer Organization* (ARM A64) | AArch64 fundamentals for the Pi 5 / Jetson (both are A64 cores) |
 | Smith, *Programming with 64-Bit ARM Assembly Language* | Hands-on A64 + NEON SIMD on the Raspberry Pi — reading and beating compiler output |
 | Scherz & Monk, *Practical Electronics for Inventors* (4th ed) | The analog/bench companion (PEI) — Modules 0–1 and 4; already cited inline on those lab pages |
-| Such, *Embedded AI: Intelligence at the Deep Edge* (No Starch, Early Access) | Project-based Module 8 companion: person-detection CNN on an MCU (Ch 4), RNN noise suppression (Ch 10), hot-word detection (Ch 12), IMU/sensor ML (Ch 7–9) |
+| Such, *Embedded AI: Intelligence at the Deep Edge* (No Starch, 2026 — published edition, 13 chapters / 32 projects) | Project-based Module 8 companion, cited for methods only (its own boards and sensors are not on this bench): EDA workflow (Ch 5), IMU preprocessing and the sensor-fusion ladder (Ch 7–8), sensor ML and fault detection (Ch 9), RNN noise suppression and PDM microphones (Ch 10), model quantization (Ch 11), hot-word feature extraction and evaluation (Ch 12), the embedded deep-learning process and CNNs (Ch 4) |
 | Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed; free PDF at szeliski.org — 1st-ed PDF in hand covers only classical detectors) | Recognition/object-detection theory for Lab 8.6 (Ch 6) |
 
 ## By module
@@ -50,7 +50,7 @@ The course pages already carry per-lab **Recommended reading** from the DSP/theo
 - Plantz then Smith: A64 assembly literacy for the Pi 5/Jetson — enough to read `objdump`/`perf` output of your C++20 builds; Smith's NEON chapters map directly to vectorizing the 9.4 image convolution.
 - Harris & Harris: memory-hierarchy/cache chapter — why tiling and row-major access dominate 9.4/9.5 throughput.
 - White: her performance/"doing more with less" material when reconciling the 8.5 benchmark results.
-- Such: the per-chapter project pairings above (8.2 ← Ch 12, 8.3 ← Ch 10, 8.4 ← Ch 7–9, 8.6 ← Ch 4 as the constrained-target contrast).
+- Such: the per-chapter pairings above (8.2 ← Ch 12, 8.3 ← Ch 10, 8.4 ← Ch 9 #15 + Ch 5 #7 + Ch 7–8, 8.5 ← Ch 11 #19, 8.6 ← Ch 4, 6.6 ← Ch 8 #11–13, 5.4 ← Ch 6 #8) — always for the method, never for the book's hardware; every lab runs on the NUCLEO-L476RG, Pi 5, or Jetson Orin Nano.
 - Szeliski (2nd ed) Ch 6: the detection theory — single- vs two-stage detectors, NMS, IoU/mAP — behind the Lab 8.6 TensorRT deployment.
 
 **Everywhere:** Seacord for the C, Grenning for the workflow, White for the architecture instincts.
