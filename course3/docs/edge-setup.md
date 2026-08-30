@@ -74,3 +74,26 @@ uv pip install numpy scipy opencv-python soundfile cupy-cuda12x pycuda
 GPU paths: CuPy (`cupyx.scipy.*`) for drop-in NumPy/SciPy on the GPU, cuFFT via CuPy or `CUDA::cufft` from C++, TensorRT for deployed models (ONNX → engine with `trtexec`).
 
 Models exported by the Module 8 training notebooks (`uv sync --group ml`, notebooks in `labs/lab-8-N/host/`) land in the same lab's `edge/` folder (`.onnx` / `.tflite` / TensorRT `.engine`).
+
+### Audio and camera devices (USB sound card + speakers, innomaker UVC camera)
+
+Both are class-compliant and driver-free on the Pi 5 and the Jetson; the STM32 has no role here.
+
+```sh
+sudo apt install alsa-utils v4l-utils              # arecord/aplay/amixer, v4l2-ctl
+
+# USB sound card (Wonrabai: stereo codec, onboard mic, mic + speaker headers; 2 x 8 ohm speakers)
+arecord -l                                          # capture devices  -> note "card N"
+aplay   -l                                          # playback devices -> same card
+arecord -D hw:N,0 -f S16_LE -r 16000 -c 1 -d 3 test.wav && aplay -D hw:N,0 test.wav
+amixer -c N                                         # mic gain / speaker volume controls
+python -c "import sounddevice as sd; print(sd.query_devices())"   # same card by index for the labs' scripts
+
+# innomaker 1080p USB 2.0 UVC camera (130-degree wide-angle)
+v4l2-ctl --list-devices                             # -> /dev/videoX
+v4l2-ctl -d /dev/videoX --list-formats-ext          # MJPEG vs YUYV, resolutions, fps
+python -c "import cv2; c=cv2.VideoCapture(0); print(c.isOpened(), c.get(3), c.get(4), c.get(5))"
+```
+
+Conventions the lab pages assume: 16 kHz mono capture for Modules 8–9 audio unless a lab says otherwise (`arecord -r 16000 -c 1`), the sound card selected **by index**, never as the default device (the HDMI/analog outputs also enumerate); the camera opened at 640x480 MJPEG for the real-time labs (`cv2.VideoCapture(0)` then `cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))`), 1080p only for the capture-then-analyze labs. The wide lens has barrel distortion toward the edges — Lab 8.6's Going further calibrates and undistorts it; keep subjects central until then. Put a device's `arecord -l` / `v4l2-ctl` listing in the lab's `notes.md` the first time it is used — USB enumeration order can change between boots.
+
