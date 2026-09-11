@@ -3,6 +3,7 @@
 #![no_main]
 
 use cortex_m_rt::entry;
+use lm3s6965 as _; // the PAC supplies the vector table: every bin in this crate needs this line
 use cortex_m_semihosting::{debug, hprintln};
 use panic_halt as _;
 

@@ -13,13 +13,13 @@ heapless = { workspace = true }
 # Linux-only crates: gated so `cargo build`/`cargo test` on the Mac stay green
 # for the POSIX-common subset; the board build gets everything.
 [target.'cfg(target_os = "linux")'.dependencies]
-nix = { version = "0.31", features = ["time", "sched", "signal", "event", "poll", "mman", "fs"] }
+nix = { version = "0.31", features = ["time", "sched", "signal", "event", "poll", "mman", "fs", "term"] }
 gpiod = "0.3"
 linux-embedded-hal = "0.5"
 
 # On macOS only the POSIX-common part of nix is needed for local iteration.
 [target.'cfg(target_os = "macos")'.dependencies]
-nix = { version = "0.31", features = ["time", "signal", "poll", "mman", "fs"] }
+nix = { version = "0.31", features = ["time", "signal", "poll", "mman", "fs", "term"] }
 
 [lints.rust]
 unsafe_op_in_unsafe_fn = "deny"

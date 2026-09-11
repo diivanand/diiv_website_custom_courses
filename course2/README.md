@@ -42,6 +42,7 @@ cargo run --bin smoke-host                                  # "course2/rust/host
 cargo check -p linux --target aarch64-unknown-linux-gnu     # Linux tier, compile-only
 (cd qemu && cargo run --release --bin smoke-qemu)           # boots QEMU, prints, exits 0
 (cd mcu  && cargo build --release --bin smoke-mcu)          # STM32L476 blinky, no board needed to build
+(cd rtic && cargo build --release --bin smoke-rtic)         # RTIC 2 on the stm32l4 PAC, same board, same rule
 cargo size -p mcu --bin smoke-mcu --release --target thumbv7em-none-eabihf -- -A
 
 cd ../c/host  && cmake --preset debug && cmake --build --preset debug && ctest --preset debug
@@ -86,6 +87,7 @@ course2/
   python/                   # M1–M3 · repo-root uv project · src/ex-M-N.py, notebooks/ex-M-N.ipynb, tests/test_ex_M_N.py
   c/
     cmake/                  # warnings.cmake (the course warning set), exercises.cmake, thumbv7em-clang.cmake
+    shared/                 # sources compiled into EVERY exercise on all three tiers (capstone driver, cross-tier kernels)
     host/                   # clang · gnu17 · -O0 + ASan/UBSan (preset debug) or -O2 (release) · one exe per src/ex-M-N/
     mcu/                    # clang --target=thumbv7em-none-eabihf · freestanding · objects + disassembly per src/ex-M-N/
     linux/                  # POSIX C · built on the Jetson/Pi (macOS builds the POSIX-common subset)
@@ -95,7 +97,8 @@ course2/
     .cargo/config.toml      # runners: thumbv7m → QEMU, thumbv7em → probe-rs; link args for cortex-m-rt / defmt
     host/                   # std · unit tests · Miri · Clippy             · src/bin/ex-M-N.rs
     qemu/                   # no_std · thumbv7m-none-eabi · lm3s6965evb    · src/bin/ex-M-N.rs · own .cargo (default target)
-    mcu/                    # no_std · thumbv7em-none-eabihf · STM32L476RG · src/bin/ex-M-N.rs · own .cargo (default target)
+    mcu/                    # no_std · thumbv7em-none-eabihf · STM32L476RG via embassy-stm32 · src/bin/ex-M-N.rs · own .cargo (default target)
+    rtic/                   # no_std · thumbv7em-none-eabihf · STM32L476RG via the stm32l4 PAC + RTIC 2 (package `rtic-l476`) · own .cargo
     linux/                  # std + nix + gpiod + linux-embedded-hal       · src/bin/ex-M-N.rs
   archive/                  # the previous (A64 assembly) course's worked m0 notes, kept for reference
 ```
@@ -115,7 +118,19 @@ See `python/README.md`. Every Python exercise ends by saving the reference artif
 
 Every `.c` file in `c/<tier>/src/ex-M-N/` compiles into one program named `ex-M-N` (host and
 linux) or into objects plus a disassembly listing (mcu). A directory containing any `test_*.c`
-is also registered with CTest. There is no per-exercise CMake file to write.
+is also registered with CTest. There is no per-exercise CMake file to write. Two more
+conventions cover the exercises that need something other than an executable:
+
+- **`src/lib-<name>/`** (host and linux) builds a **shared library** `lib-<name>.dylib`/`.so`
+  instead — compiled and linked sanitizer-free whatever the preset, because a Python process
+  cannot `dlopen` an ASan-instrumented library. This is the `ctypes`/`cffi` bridge of
+  Exercise 2.6.
+- **`c/shared/`** (recursive) is compiled into **every** exercise on **every** tier: as the static
+  library `course2_shared` linked automatically on host/linux, and as the pseudo-exercise `shared`
+  (objects + `dis-shared` listing) on mcu, with `c/shared/` on the include path. It exists for
+  code that must be the same file on three tiers — the Module 12 capstone's `shared/ads1115/`
+  driver, or a kernel that `c/host` tests and `c/mcu` disassembles. Sources there must be
+  freestanding-safe.
 
 ```sh
 cd c/host
@@ -138,6 +153,7 @@ cd rust
 $EDITOR host/src/bin/ex-5-3.rs   && cargo run --bin ex-5-3                # host
 $EDITOR qemu/src/bin/ex-9-2.rs   && (cd qemu && cargo run --bin ex-9-2)   # boots QEMU
 $EDITOR mcu/src/bin/ex-8-4.rs    && (cd mcu  && cargo run --release --bin ex-8-4)   # flashes the NUCLEO (probe-rs)
+$EDITOR rtic/src/bin/ex-10-2.rs  && (cd rtic && cargo run --release --bin ex-10-2)  # the RTIC tier, same board
 $EDITOR linux/src/bin/ex-11-1.rs && cargo check -p linux --target aarch64-unknown-linux-gnu   # then build on the board
 ```
 
@@ -150,7 +166,15 @@ equivalent is explicit: `cargo run -p qemu --target thumbv7m-none-eabi --bin ex-
 ```sh
 cargo clippy -p qemu --target thumbv7m-none-eabi   --lib --bins -- -D warnings
 cargo clippy -p mcu  --target thumbv7em-none-eabihf --lib --bins -- -D warnings
+cargo clippy -p rtic-l476 --target thumbv7em-none-eabihf --lib --bins -- -D warnings
 ```
+
+**Why `rtic/` is a separate crate:** RTIC binds to the community `stm32l4` PAC (svd2rust output) and
+`embassy-stm32` brings its own PAC (`stm32-metapac`); both define the vector table, so they cannot
+share one binary. Module 10's RTIC exercises therefore live in `rtic/`, the Embassy ones in `mcu/`.
+The `qemu/` crate carries the `lm3s6965` PAC so RTIC's pipeline logic also runs under QEMU — which
+puts `cortex-m-rt` in device mode, so **every `qemu/` binary needs `use lm3s6965 as _;`** (the smoke
+binary shows the line) or the link fails with "The interrupt vectors are missing".
 
 (`--all-targets` would try to build a test harness, which does not exist without `std`.)
 
@@ -165,7 +189,10 @@ Pinned crate set (edition 2024): `cortex-m` 0.7 (`critical-section-single-core`)
 `memory-x`, `time-driver-any`, `exti`, `defmt`), `embassy-executor` 0.10 (`platform-cortex-m`,
 `executor-thread`, `defmt`), `embassy-time` 0.5, `embassy-sync` 0.8, `embedded-hal` 1.0,
 `heapless` 0.9, `critical-section` 1.2, `static_cell` 2, `defmt` 1, `defmt-rtt` 1, `panic-probe`
-1, `nix` 0.31, `gpiod` 0.3, `linux-embedded-hal` 0.5, `libc` 0.2.
+1, `nix` 0.31, `gpiod` 0.3, `linux-embedded-hal` 0.5, `libc` 0.2; for the RTIC tier `stm32l4` 0.16
+(`stm32l4x6`, `rt`), `rtic` 2.3 (`thumbv7-backend`), `rtic-monotonics` 2 (`cortex-m-systick`),
+`rtic-sync` 1, and `lm3s6965` 0.2 in `qemu/`. The release profile pins `opt-level = "s"`, `lto`,
+`codegen-units = 1`, `panic = "abort"`, `debug = 2`.
 
 ## The two cross-target notes
 

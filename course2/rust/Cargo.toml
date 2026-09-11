@@ -2,11 +2,12 @@
 #   host/   std        · Mac · unit tests, Miri, Clippy
 #   qemu/   no_std     · thumbv7m-none-eabi   · lm3s6965evb in QEMU (semihosting)
 #   mcu/    no_std     · thumbv7em-none-eabihf · STM32L476RG via embassy-stm32 (probe-rs)
+#   rtic/   no_std     · thumbv7em-none-eabihf · STM32L476RG via the stm32l4 PAC + RTIC 2 (probe-rs)
 #   linux/  std        · aarch64-unknown-linux-gnu · Jetson Orin Nano / Pi 5
 # Exercises are per-tier binaries: <crate>/src/bin/ex-M-N.rs
 [workspace]
 resolver = "2"
-members = ["host", "qemu", "mcu", "linux"]
+members = ["host", "qemu", "mcu", "rtic", "linux"]
 # A bare `cargo build`/`cargo test` at the root builds only the host-target
 # crates; the no_std crates are built with `-p qemu --target thumbv7m-none-eabi`
 # / `-p mcu --target thumbv7em-none-eabihf`, or from inside their own directory.
@@ -30,9 +31,10 @@ cortex-m-rt = "0.7"
 # matters (tests run under `dev`).
 [profile.release]
 debug = 2
-lto = true
+lto = true            # "fat": whole-program, HAL included
 codegen-units = 1
 opt-level = "s"
+panic = "abort"       # already the bare-metal targets' default; pinned so the host/linux release builds match
 
 # `dev` at -O1 so QEMU/board debug builds are not absurdly slow or large.
 [profile.dev]

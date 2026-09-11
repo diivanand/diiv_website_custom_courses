@@ -29,21 +29,32 @@ endif()
 
 add_custom_target(dis COMMENT "Disassemble every exercise")
 
+# c/shared/ (recursive) is compiled here too, as the pseudo-exercise `shared`
+# (objects + dis-shared listing), and is on every exercise's include path — the
+# same convention as host/ and linux/, so one kernel serves all three tiers.
+set(COURSE2_SHARED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../shared")
 file(GLOB _dirs LIST_DIRECTORIES true CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*")
+if(IS_DIRECTORY "${COURSE2_SHARED_DIR}")
+  list(APPEND _dirs "${COURSE2_SHARED_DIR}")
+endif()
 set(_count 0)
 foreach(_d IN LISTS _dirs)
   if(NOT IS_DIRECTORY "${_d}")
     continue()
   endif()
   get_filename_component(_name "${_d}" NAME)
-  file(GLOB _srcs CONFIGURE_DEPENDS "${_d}/*.c")
+  if(_d STREQUAL "${COURSE2_SHARED_DIR}")
+    file(GLOB_RECURSE _srcs CONFIGURE_DEPENDS "${_d}/*.c")
+  else()
+    file(GLOB _srcs CONFIGURE_DEPENDS "${_d}/*.c")
+  endif()
   if(NOT _srcs)
     message(STATUS "  ${_name}: no .c files yet — skipped")
     continue()
   endif()
   # OBJECT library = "compile, never link".
   add_library(${_name} OBJECT ${_srcs})
-  target_include_directories(${_name} PRIVATE "${_d}")
+  target_include_directories(${_name} PRIVATE "${_d}" "${COURSE2_SHARED_DIR}")
   target_compile_options(${_name} PRIVATE ${COURSE2_WARNINGS})
 
   set(_lst_dir "${CMAKE_CURRENT_BINARY_DIR}/${_name}")
