@@ -1,11 +1,9 @@
-# Module 1 — Scientific Python Core: NumPy, SciPy, Matplotlib, and the Notebook Workflow
+# Module 1 — Toolchains, Targets, and the Availability Matrix
 
 Site: [lessons](https://www.diiv.io/course2/lessons-m1.html) · [exercises](https://www.diiv.io/course2/exercises-m1.html)
 
-Code for this module lives in the Python workspace: `../python/src/ex-1-N.py`,
-`../python/notebooks/ex-1-N.ipynb`, `../python/tests/test_ex_1_N.py`, artifacts in `../python/artifacts/ex-1-N.npz`. This file is the write-up;
-every exercise ends with the saved reference artifact (`.npy`/`.npz` + tolerance) that the later
-C/Rust modules are verified against.
+Code for this module lives in the tier workspaces: `../c/{host,mcu,rtos,linux}/src/ex-1-N/`
+(and `../c/shared/` for code that must be one file on every tier). This file is the write-up.
 
 ## Setup notes
 

@@ -1,7 +1,7 @@
 [project]
 name = "diiv-course-labs"
 version = "0.1.0"
-description = "Shared Python for all diiv.io course workspaces: simulate-first prototypes, serial capture, analysis, and plotting (per-lab work in course3/labs/lab-M-N/host/ and course2/python/)"
+description = "Shared Python for the diiv.io Course 3 lab workspace: simulate-first prototypes, serial capture, analysis, and plotting (per-lab work in course3/labs/lab-M-N/host/)"
 requires-python = ">=3.13"
 dependencies = [
     # numerics + DSP reference implementations
@@ -9,11 +9,6 @@ dependencies = [
     "scipy",
     "pandas",
     "tabulate",          # pandas .to_markdown() for notes.md tables
-    # classical ML + JIT (Course 2 Module 2)
-    "scikit-learn",
-    "numba",
-    # tests (Course 2 python/tests)
-    "pytest",
     # plotting + notebooks (JupyterLab, ipykernel, nbconvert included)
     "matplotlib",
     "jupyter",
@@ -36,7 +31,6 @@ ml = [
     "torch",
     "torchaudio",
     "torchvision",
-    "tensorboard",       # torch.utils.tensorboard.SummaryWriter (Course 2 Module 3)
     "onnx",
     "onnxruntime",
     "tensorflow",

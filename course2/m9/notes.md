@@ -1,9 +1,9 @@
-# Module 9 — Interrupts and Shared State
+# Module 9 — Embedded Linux Systems Programming
 
 Site: [lessons](https://www.diiv.io/course2/lessons-m9.html) · [exercises](https://www.diiv.io/course2/exercises-m9.html)
 
-Code for this module lives in the tier workspaces: `../c/{host,mcu,linux}/src/ex-9-N/` and
-`../rust/{host,qemu,mcu,linux}/src/bin/ex-9-N.rs`. This file is the write-up.
+Code for this module lives in the tier workspaces: `../c/{host,mcu,rtos,linux}/src/ex-9-N/`
+(and `../c/shared/` for code that must be one file on every tier). This file is the write-up.
 
 ## Setup notes
 

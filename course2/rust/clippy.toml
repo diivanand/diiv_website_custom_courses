@@ -1,2 +1,0 @@
-# Course-wide Clippy configuration (the lint *levels* live in each crate's lib.rs).
-avoid-breaking-exported-api = false

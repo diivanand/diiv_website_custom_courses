@@ -7,7 +7,7 @@ project(course2_linux C)
 # It also configures and builds on the Mac so that the macOS-common POSIX subset
 # (pthreads, clock_gettime, sockets, termios) can be iterated on locally;
 # Linux-only APIs (timerfd, epoll, signalfd, libgpiod, i2c-dev) simply won't
-# compile here, which is itself the Module 8 availability lesson.
+# compile here, which is itself Module 0's availability lesson (Module 8 is the tier's module).
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)

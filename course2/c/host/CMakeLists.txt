@@ -3,7 +3,8 @@ project(course2_host C)
 
 # Host tier: Apple clang, C17/18 with GNU extensions, the course warning set,
 # ASan+UBSan in the debug preset.  This is where every C experiment that can run
-# on the Mac runs — and where the sanitizers make undefined behavior visible.
+# on the Mac runs — where the sanitizers make undefined behavior visible, and
+# where Module 9's Unity tests run under CTest (any src/ex-M-N/test_*.c).
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)          # gnu17 — matches Course 3's firmware and the labs' CMSIS headers

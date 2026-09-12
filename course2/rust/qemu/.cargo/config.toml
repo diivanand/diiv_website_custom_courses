@@ -1,4 +1,0 @@
-# `cargo run` from inside qemu/ targets the QEMU board.  From the workspace root
-# use `cargo run -p qemu --target thumbv7m-none-eabi --bin <name>`.
-[build]
-target = "thumbv7m-none-eabi"

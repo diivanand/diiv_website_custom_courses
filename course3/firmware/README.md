@@ -21,11 +21,14 @@ Plus two things that are **not** MCU projects:
 
 ## Prerequisites
 
-The ARM toolchain is **not** installed on this machine. Everything else in the repo builds without
-it — only the six MCU projects need it:
+The GNU Arm toolchain is needed by the six MCU projects here and by Course 2's `qemu` presets;
+everything else in the repo builds without it. Install it one of these ways — the toolchain file
+searches `PATH`, `~/opt/arm-gnu-toolchain-*/bin`, and `/Applications/ArmGNUToolchain/*/arm-none-eabi/bin`:
 
 ```sh
-brew install --cask gcc-arm-embedded      # Arm's official GNU toolchain
+brew install --cask gcc-arm-embedded      # Arm's official GNU toolchain (the .pkg needs sudo)
+# or, without sudo: unpack Arm's macOS arm64 .tar.xz (or the .pkg payload via pkgutil --expand-full)
+#   under ~/opt/arm-gnu-toolchain-<version>/   — this machine has 15.3.rel1 there
 # or
 brew install arm-none-eabi-gcc
 ```

@@ -17,7 +17,7 @@ Companion repository for the lab-based courses on [diiv.io](https://www.diiv.io)
 
 | Folder | Course | What's in it |
 |---|---|---|
-| [`course2/`](course2/) | [Course 2 — Programming Foundations: Scientific Python, Modern Embedded C & Embedded Rust](https://www.diiv.io/course2/) | Python (`python/`, repo-root uv project), tier-organized C (CMake: host / Cortex-M4 objects / Linux) and Rust (cargo workspace: host / QEMU / STM32 / Linux) workspaces, per-module notes — build scaffolding fully set up (see [`course2/README.md`](course2/README.md)) |
+| [`course2/`](course2/) | [Course 2 — Modern Embedded C: C17/18 for Bare Metal, RTOS, and Embedded Linux](https://www.diiv.io/course2/) | Tier-organized C (CMake): host under the sanitizers, Cortex-M4F objects + a QEMU-run bare-metal runtime, FreeRTOS from source in QEMU, POSIX on the boards and Rust (cargo workspace: host / QEMU / STM32 / Linux) workspaces, per-module notes — build scaffolding fully set up (see [`course2/README.md`](course2/README.md)) |
 | [`course3/`](course3/) | [Course 3 — Embedded DSP](https://www.diiv.io/course3/) | 45 bench labs: instruments → mixed-signal I/O → STM32 real-time DSP firmware → edge ML → host-in-the-loop media |
 | [`course4/`](course4/) | [Course 4 — Real-Time Rendering & GPU Engineering](https://www.diiv.io/course4/) | A self-contained C++20/CMake project: Vulkan + Metal engine, Swift Metal apps, CUDA labs — build scaffolding fully set up (see [`course4/README.md`](course4/README.md)) |
 
@@ -27,8 +27,8 @@ Companion repository for the lab-based courses on [diiv.io](https://www.diiv.io)
 
 | Target | Used by |
 |---|---|
-| **Apple Silicon Mac (M-series)** | Course 2 (host C under sanitizers, Cortex-M cross-compilation with Apple clang, Rust for every target, bare-metal Rust in QEMU); Course 4 (Metal natively, Vulkan via MoltenVK, Xcode GPU capture) |
-| **NUCLEO-L476RG** (STM32L476RG, Cortex-M4F @ 80 MHz) | Course 3 real-time firmware (Modules 2–3, 5–7, 9); Course 2 bare-metal / RTOS tier (embassy-stm32 via probe-rs — optional, builds without the board) |
+| **Apple Silicon Mac (M-series)** | Course 2 (host C under sanitizers, Cortex-M cross-compilation with Apple clang, bare-metal C and FreeRTOS in QEMU with the GNU Arm toolchain); Course 4 (Metal natively, Vulkan via MoltenVK, Xcode GPU capture) |
+| **NUCLEO-L476RG** (STM32L476RG, Cortex-M4F @ 80 MHz) | Course 3 real-time firmware (Modules 2–3, 5–7, 9); Course 2 bare-metal / RTOS tier (optional rung: the same C built into Course 3's CubeMX projects) |
 | **Raspberry Pi 5** | Course 3 edge Linux target (Modules 8–9); Course 2 embedded-Linux tier |
 | **NVIDIA Jetson Orin Nano** | Course 3 edge GPU (Modules 8–9); Course 2 embedded-Linux tier |
 | **Linux desktop (NVIDIA RTX 4090)** | Course 4 native Vulkan + CUDA + Nsight — driven remotely from the Mac via CLion's SSH toolchain |
@@ -43,23 +43,25 @@ nothing beyond the Xcode command-line tools and `uv`.**
 | What | Where | Command | Works today |
 |---|---|---|---|
 | Python (all courses) | repo root | `uv sync`, then `uv run jupyter lab` | ✅ |
-| Course 2 — Python (Modules 1–3) | `course2/python/` | `uv run pytest course2/python/tests`, `uv run python course2/python/src/smoke.py` | ✅ (`uv sync --group ml` for the PyTorch module) |
-| Course 2 — Rust, host + Linux-tier check | `course2/rust/` | `cargo build && cargo test`, `cargo check -p linux --target aarch64-unknown-linux-gnu` | ✅ |
-| Course 2 — Rust, bare metal in QEMU | `course2/rust/qemu/` | `cargo run --release --bin smoke-qemu` | ✅ (needs `brew install qemu`) |
-| Course 2 — Rust, STM32L476 | `course2/rust/mcu/` | `cargo build --release --bin smoke-mcu` | ✅ builds; flashing needs `probe-rs` + the NUCLEO |
-| Course 2 — C, host / Cortex-M4 objects / Linux | `course2/c/{host,mcu,linux}` | `cmake --preset <debug\|m4\|release> && cmake --build --preset <…>` | ✅ (Linux-only exercises build on the board) |
+| Course 2 — C, host (ASan/UBSan, CTest + Unity) | `course2/c/host/` | `cmake --preset debug && cmake --build --preset debug && ctest --preset debug` | ✅ |
+| Course 2 — C, Cortex-M4F objects + disassembly | `course2/c/mcu/` | `cmake --preset m4 && cmake --build --preset dis` | ✅ (Apple clang, no Arm toolchain needed) |
+| Course 2 — C, bare metal in QEMU | `course2/c/mcu/` | `cmake --preset qemu && cmake --build --preset smoke-qemu` | ✅ (needs the GNU Arm toolchain + `brew install qemu`) |
+| Course 2 — FreeRTOS in QEMU | `course2/c/rtos/` | `cmake --preset qemu && cmake --build --preset smoke-rtos` | ✅ (same requirements; fetches FreeRTOS-Kernel) |
+| Course 2 — C, embedded Linux | `course2/c/linux/` | `cmake --preset release && cmake --build --preset release` | ✅ configures on the Mac; Linux-only exercises build on the board |
 | Course 4 — C++ / Vulkan | `course4/` | `cmake --preset release && cmake --build --preset release` | ✅ (~100 build steps) |
 | Course 4 — Swift / Metal | `course4/metal-swift/` | `swift build` | ✅ |
 | Course 3 — portable DSP kernels | `course3/firmware/host/` | `cmake --preset debug && cmake --build --preset debug && ctest --preset debug` | ✅ |
 | Course 4 — CUDA | `course4/` | `cmake --preset linux-release` | needs the RTX 4090 box |
-| Course 3 — STM32 firmware | `course3/firmware/m*/` | `cmake --preset debug && cmake --build --preset debug` | needs `arm-none-eabi-gcc` + CubeMX generation |
+| Course 3 — STM32 firmware | `course3/firmware/m*/` | `cmake --preset debug && cmake --build --preset debug` | needs the GNU Arm toolchain + CubeMX generation |
 
 Two things are deliberately *not* buildable on the Mac, and both say so plainly when you try:
 
-- **STM32 firmware** needs `brew install --cask gcc-arm-embedded` plus a one-time CubeMX generation
-  per module. Configuring without the toolchain prints the install commands rather than a wall of
-  CMake compiler-detection errors. See [`course3/firmware/README.md`](course3/firmware/README.md).
-  (Course 2's `c/mcu` deliberately does *not* need it — Apple clang cross-compiles the objects.)
+- **STM32 firmware** needs the GNU Arm toolchain (`brew install --cask gcc-arm-embedded`, or Arm's
+  release unpacked under `~/opt/arm-gnu-toolchain-<ver>/` — both CMake toolchain files look there)
+  plus a one-time CubeMX generation per module. Configuring without the toolchain prints the
+  install commands rather than a wall of CMake compiler-detection errors. See
+  [`course3/firmware/README.md`](course3/firmware/README.md). Course 2's `qemu` presets use the
+  same toolchain; its `m4` presets do not need it — Apple clang cross-compiles the objects.
 - **CUDA** exists only on the Linux desktop; the Mac presets don't include it.
 
 ### First run from a fresh clone
@@ -67,10 +69,10 @@ Two things are deliberately *not* buildable on the Mac, and both say so plainly 
 ```bash
 uv sync                                              # Python, all courses
 
-cd course2/rust && cargo build && cargo test \
-  && (cd qemu && cargo run --release --bin smoke-qemu) \
-  && (cd mcu && cargo build --release --bin smoke-mcu) && cd ../..   # Rust: host, QEMU, STM32
-cd course2/c/host && cmake --preset debug && cmake --build --preset debug && cd ../../..   # C host tier
+cd course2/c/host && cmake --preset debug && cmake --build --preset debug && ctest --preset debug && cd ../mcu \
+  && cmake --preset m4   && cmake --build --preset dis \
+  && cmake --preset qemu && cmake --build --preset smoke-qemu && cd ../rtos \
+  && cmake --preset qemu && cmake --build --preset smoke-rtos && cd ../../..   # C: host, objects, QEMU, FreeRTOS
 
 cd course4 && cmake --preset release \
            && cmake --build --preset release         # fetches deps, ~100 build steps
@@ -85,11 +87,11 @@ exercise exists, so a green build never means "you already wrote something."
 
 ## Python: one uv project for the whole repo
 
-A single [uv](https://docs.astral.sh/uv/) project at the repo root, pinned to **Python 3.13** (`.python-version`), shared by every course's Python work — Course 3's simulate-first prototypes and analysis notebooks, Course 2's scientific-Python modules (`course2/python/`: NumPy/SciPy/Matplotlib, pandas, scikit-learn, Numba, pytest; PyTorch in the `ml` group), and Course 4's CUDA-Python track:
+A single [uv](https://docs.astral.sh/uv/) project at the repo root, pinned to **Python 3.13** (`.python-version`), shared by the Course 3 Python work — Course 3's simulate-first prototypes and analysis notebooks, Course 2's scientific-Python modules (`course2/python/`: NumPy/SciPy/Matplotlib, pandas, scikit-learn, Numba, pytest; PyTorch in the `ml` group), and Course 4's CUDA-Python track:
 
 ```bash
-uv sync                 # core: numpy/scipy/matplotlib/pandas/scikit-learn/numba/pytest/jupyter/pyserial/…
-uv sync --group ml      # Course 3 Module 8 + Course 2 Module 3: torch/torchaudio/torchvision/onnx/onnxruntime/tensorflow
+uv sync                 # core: numpy/scipy/matplotlib/pandas/jupyter/pyserial/sounddevice/librosa/opencv/…
+uv sync --group ml      # Course 3 Module 8: torch/torchaudio/torchvision/onnx/onnxruntime/tensorflow
 uv run jupyter lab
 ```
 
@@ -101,11 +103,11 @@ Device-side Python on the Pi/Jetson (CuPy, TensorRT, tflite-runtime, smbus2) is 
 diiv_website_custom_courses/
   README.md
   pyproject.toml              # shared uv project (all courses' Python work)
-  course2/                    # ── Programming foundations: Python, C, Rust ──
-    m0/ … m12/                #   notes.md per module (predicted vs observed write-ups)
-    python/                   #   M1–M3 scientific Python: src/ex-M-N.py, notebooks/, tests/ (repo-root uv project)
-    c/{host,mcu,linux}/       #   CMake projects by tier: one exe (or object+disassembly) per src/ex-M-N/
-    rust/{host,qemu,mcu,linux}/ # one cargo workspace by tier: src/bin/ex-M-N.rs per exercise
+  course2/                    # ── Modern embedded C ──────────────────────────
+    m0/ … m9/                 #   notes.md per module (predicted vs observed write-ups)
+    c/{host,mcu,rtos,linux}/  #   CMake projects by tier: one exe / object+listing / QEMU-run ELF per src/ex-M-N/
+    c/mcu/qemu/               #   the bare-metal runtime: startup.c, semihost.c, stm32l4.ld (STM32L4 map, QEMU b-l475e-iot01a)
+    c/shared/                 #   compiled into every exercise on every tier (the M9 capstone driver)
   course3/                    # ── Embedded DSP labs ──────────────────────────
     docs/                     #   reading-map.md, edge-setup.md (Pi 5 / Jetson + C++20 CMake template)
     firmware/                 #   STM32 CMake projects (C18), one per module with firmware (m2,m3,m5–m7,m9)

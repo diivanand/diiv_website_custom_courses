@@ -2,9 +2,9 @@
 #
 # clang targets thumbv7em-none-eabihf directly.  The target is bare-metal and
 # has no libc in this sysroot, so this toolchain only ever produces OBJECT files
-# (and their disassembly): it never links and never runs.  Real STM32 ELFs are
-# linked by Course 3's firmware projects with arm-none-eabi-gcc and a CubeMX
-# linker script — that is deliberately not duplicated here.
+# (and their disassembly): it never links and never runs.  Real ELFs come from
+# arm-none-eabi-gcc.cmake (the `qemu` presets, run in QEMU) and from Course 3's
+# firmware projects (CubeMX linker script, flashed to the NUCLEO).
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
