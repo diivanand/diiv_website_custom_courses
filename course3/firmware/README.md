@@ -21,7 +21,7 @@ Plus two things that are **not** MCU projects:
 
 ## Prerequisites
 
-The GNU Arm toolchain is needed by the six MCU projects here and by Course 2's `qemu` presets;
+The GNU Arm toolchain is needed by the six MCU projects here;
 everything else in the repo builds without it. Install it one of these ways — the toolchain file
 searches `PATH`, `~/opt/arm-gnu-toolchain-*/bin`, and `/Applications/ArmGNUToolchain/*/arm-none-eabi/bin`:
 

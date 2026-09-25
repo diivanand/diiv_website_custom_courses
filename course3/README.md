@@ -62,7 +62,7 @@ for Module 8) before any C/C++ is written; the compiled implementation is
 validated against that reference, measured on real hardware (DWT cycle counter,
 scope, Saleae), and reconciled in the lab's `notes.md`.
 
-Per-lab convention matches the Course 2/4 workspaces: a lab is *done* when its
+Per-lab convention matches the Course 4 workspace: a lab is *done* when its
 `notes.md` has every Measured cell filled and `captures/` holds the raw
 instrument evidence. All notes/measurements/code are written by hand — the
 scaffolding here only removes build friction.

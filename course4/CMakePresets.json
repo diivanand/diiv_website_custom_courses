@@ -42,12 +42,8 @@
     },
     {
       "name": "linux-release",
-      "displayName": "Linux/4090: release + CUDA labs",
+      "displayName": "Linux/4090: release",
       "inherits": "release",
-      "cacheVariables": {
-        "COURSE4_ENABLE_CUDA": "ON",
-        "CMAKE_CUDA_ARCHITECTURES": "89"
-      },
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -56,7 +52,7 @@
     },
     {
       "name": "linux-profile",
-      "displayName": "Linux/4090: profile + CUDA labs",
+      "displayName": "Linux/4090: profile",
       "inherits": "linux-release",
       "cacheVariables": {
         "TRACY_ENABLE": "ON"

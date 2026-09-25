@@ -21,16 +21,14 @@ One-time environment steps per platform. Everything else is fetched by CMake.
 
 ## Linux desktop (NVIDIA GeForce RTX 4090)
 
-- **NVIDIA driver + CUDA Toolkit** (nvcc, Nsight Systems, Nsight Compute);
+- **NVIDIA driver** (plus Nsight Systems for GPU-side timeline profiling);
   power/thermals via `nvidia-smi` (`nvidia-smi dmon`, or
-  `--query-gpu=power.draw,temperature.gpu`).
+  `--query-gpu=power.draw,temperature.gpu`). The CUDA Toolkit is only needed by
+  Course 2's *100 exercises to learn modern C++* CUDA track, set up in that repo.
 - **Vulkan:** `vulkan-tools` / SDK pieces via apt; `vulkaninfo --summary` should
   show the 4090 (discrete Ada Lovelace GPU).
-- Configure with the `linux-release` / `linux-profile` presets
-  (`CMAKE_CUDA_ARCHITECTURES=89` is pinned there).
+- Configure with the `linux-release` / `linux-profile` presets.
 - **RenderDoc:** install the Linux build for Vulkan frame debugging (Module 6).
-- **Python track:** from the repo root, `uv add --group cuda numba cupy-cuda12x`
-  once, then `uv run --group cuda python course4/cuda/python/lab_1_1.py`.
 
 ### Remote development from the Mac (CLion)
 

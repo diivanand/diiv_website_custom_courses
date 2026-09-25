@@ -13,8 +13,7 @@ set(CMAKE_SYSTEM_PROCESSOR arm)
 # Honour ARM_TOOLCHAIN_DIR if the owner installed the toolchain somewhere the
 # PATH does not cover (e.g. the ST-bundled copy inside STM32CubeCLT).
 # Also look where Arm's macOS release lands when installed without sudo (a
-# user-space unpack under ~/opt) or through the .pkg (/Applications) — the
-# same search as course2/c/cmake/arm-none-eabi-gcc.cmake.
+# user-space unpack under ~/opt) or through the .pkg (/Applications).
 file(GLOB _arm_candidates
      "$ENV{HOME}/opt/arm-gnu-toolchain-*/bin"
      "/Applications/ArmGNUToolchain/*/arm-none-eabi/bin")
@@ -38,8 +37,7 @@ if(NOT ARM_GCC)
     "    cmake --preset debug -DARM_TOOLCHAIN_DIR=/opt/ST/STM32CubeCLT/GNU-tools-for-STM32/bin\n"
     "\n"
     "  or unpack Arm's .tar.xz / .pkg payload under ~/opt/arm-gnu-toolchain-<ver>/ (no sudo).\n"
-    "  Course 2's qemu presets use the same toolchain; its m4 presets, Course 4, and the\n"
-    "  Python host work all build without it.  See firmware/README.md.\n")
+    "  Course 4 and the Python host work all build without it.  See firmware/README.md.\n")
 endif()
 
 get_filename_component(_arm_bin "${ARM_GCC}" DIRECTORY)
